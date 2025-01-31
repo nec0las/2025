@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Harry Potter电影数据展示</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
+    <style>
+        /* 新增字体定义 */
+        @font-face {
+            font-family: 'ParryHotter';
+            src: url('ParryHotter-1.ttf') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url('背景.jpeg');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            backdrop-filter: blur(5px);
+            padding: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.5em;
+            margin-bottom: 70px;
+        }
+
+        /* 自定义标题样式 */
+        .magic-title {
+            font-family: 'ParryHotter', sans-serif;
+            color: #FFD700; /* 金色 */
+            text-shadow:
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000; /* 黑色描边 */
+                font-size: 3em; /* 修改这里的值以增大字体大小 */
+                 display: block; /* 确保内容独立成行 */
+    text-align: center; /* 居中 */
+    margin-bottom: -0.5em; /* 减少底部外边距，可根据需要调整 */
+        }
+
+        .sub-title {
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            1px 1px 0 #000; /* 黑色描边 */
+            font-size: 1em; /* 确保这是另一个标题的原始大小 */
+             display: block; /* 确保内容独立成行 */
+    text-align: center; /* 居中 */
+        }
+
+        .content {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* 统一图表样式 */
+        .chart-box {
+            width: 32%;
+            height: 65vh;
+            min-width: 300px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                justify-content: center;
+            }
+            .chart-box {
+                width: 48%;
+                height: 50vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chart-box {
+                width: 95%;
+                min-width: unset;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 修改后的标题部分 -->
+        <h1>
+            <span class="magic-title">Harry Potter</span>
+            <span class="sub-title">电影数据展示</span>
+        </h1>
+        <div class="content">
+            <div class="chart-box">
+                <h2 class="chart-title">情感分析</h2>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2 class="chart-title">电影及其元素受欢迎程度</h2>
+                <div id="wordcloud" style="height: calc(100% - 40px);"></div>
+            </div>
+            <div class="chart-box">
+                <h2 class="chart-title">话题讨论分布</h2>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 饼图配置
+        new Chart(document.getElementById('pieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['积极', '消极', '中立'],
+                datasets: [{
+                    data: [0.42, 0.38, 0.20],
+                    backgroundColor: [
+                        '#FF638480',
+                        '#36A2EB80',
+                        '#FFCE5680',
+                        '#4BC0C080'
+                    ],
+                    borderColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+
+        // 柱状图配置
+        new Chart(document.getElementById('barChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['拍摄争议', '电影与原著差异', '个人偏好', '角色塑造', '视觉效果'],
+                datasets: [{
+                    label: '讨论数量',
+                    data: [250, 320, 80, 180, 120].map(v => v + Math.floor(Math.random()*20)),
+                    backgroundColor: '#4BC0C080',
+                    borderColor: '#4BC0C0',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 词云配置
+        const wordData = [
+            ['魁地奇', 32], ['密室', 55], ['阿兹卡班', 90],
+            ['火焰杯', 100], ['凤凰社', 60], ['罗恩', 35],
+            ['死亡圣器', 42], ['老魔杖', 34], ['魔法石', 31],
+            ['混血王子', 29], ['邓布利多', 22], ['伏地魔', 41],
+            ['哈利', 71], ['小天狼星', 62], ['赫敏', 33]
+        ];
+
+        WordCloud(document.getElementById('wordcloud'), {
+            list: wordData,
+            gridSize: 3,
+            weightFactor: 1,
+            fontFamily: 'SimHei, Arial',
+            color: (word, weight) => {
+                const colors = ['#6C7A89', '#8E44AD', '#3498DB', '#27AE60', '#F1C40F'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            },
+            rotateRatio: 0.3,
+            backgroundColor: 'rgba(255, 255, 255, 0)',
+            shape: 'circle',
+            minSize: 8,
+            drawOutOfBound: false
+        });
+    </script>
+</body>
+</html>
